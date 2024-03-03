@@ -1,1 +1,12 @@
-I. lorem ipsum
+I. This is an example outline
+A. Some OCR applications will just
+put line breaks in the middle of lines
+B. While others may be able to read the whole line, even if it wraps onto another line.
+1. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse eu vehicula eros.
+Nullam congue, dui vel iaculis ullamcorper, tellus ante mollis dui, non commodo dolor sem et nunc.
+Integer consequat venenatis iaculis. Sed congue mi aliquam vehicula suscipit.
+Praesent faucibus tortor eros, in laoreet nunc tempus a. Sed placerat a libero in feugiat.
+Vivamus sit amet purus arcu. Aliquam quis elit porttitor, eleifend ex porttitor, luctus nulla.
+II. Some more text
+A. Nam vitae dui volutpat nunc pretium posuere.
+Quisque maximus luctus vehicula. Vestibulum ornare rutrum ipsum, at ultricies mauris mollis pharetra. In interdum mattis lacus feugiat pharetra. Maecenas dignissim in libero eget tempor. Nullam ut pharetra nulla. Aenean at semper nulla. Praesent vulputate pellentesque rutrum.
