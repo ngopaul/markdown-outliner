@@ -9,6 +9,8 @@ Original code by [@dinushkaherath](https://github.com/dinushkaherath).
 
 Modified by Paul Ngo to function through file I/O with no dependencies.
 
+![](./example.gif)
+
 ## Usage
 
 1. Paste the contents of the outline into `outline.txt`
