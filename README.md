@@ -5,7 +5,9 @@ as can be automatically done by an iphone or by an OCR application,
 into something that is markdown- and logseq-friendly, for pasting
 into another application.
 
-Original code by Dinushka Herath; Modified by Paul Ngo to have no dependencies
+Original code by [@dinushkaherath](https://github.com/dinushkaherath).
+
+Modified by Paul Ngo to function through file I/O with no dependencies.
 
 ## Usage
 
