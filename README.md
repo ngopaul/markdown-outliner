@@ -22,7 +22,7 @@ Now the re-formatted outline is in `updated_outline.txt`.
 
 1. `python`. You will have to install xcode tools on macOS.
 
-## Limitations and Note
+## Further Notes
 
 - Requires that the outline be formatted like "I. ". That is, a new line, 
 followed by the roman numeral or number, followed by a period, 
