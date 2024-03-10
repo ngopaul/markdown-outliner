@@ -69,7 +69,7 @@ def print_order(order, full_repr=True):
 
     # special handling for high level positions, become headers
     if pos in position_to_header_mapping:
-        prefix = position_to_header_mapping[pos]
+        prefix = position_to_header_mapping[pos] + " "
 
     wrap_start = ("(" if full_repr else "")
     wrap_end = (")" if full_repr else "")
