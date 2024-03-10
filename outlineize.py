@@ -76,19 +76,19 @@ def print_order(order, full_repr=True):
     suffix = ("." if full_repr else "")
 
     if pos > 0:
-        last_added_order = chr(order[1] % 24 + 64) + suffix  # Uppercase letters: A. B.
+        last_added_order = chr(order[1] % 26 + 64) + suffix  # Uppercase letters: A. B.
         result += last_added_order
     if pos > 1:
         last_added_order = str(order[2]) + suffix  # 1. 2.
         result += last_added_order
     if pos > 2:
-        last_added_order = chr(order[3] % 24 + 96) + suffix  # Lowercase letters: a. b.
+        last_added_order = chr(order[3] % 26 + 96) + suffix  # Lowercase letters: a. b.
         result += last_added_order
     if pos > 3:
         last_added_order = f"{wrap_start}{order[4]}{wrap_end}"  # (1) (2)
         result += last_added_order
     if pos > 4:
-        last_added_order = f"{wrap_start}{chr(order[3] % 24 + 96)}{wrap_end}"  # (a) (b)
+        last_added_order = f"{wrap_start}{chr(order[3] % 26 + 96)}{wrap_end}"  # (a) (b)
         result += last_added_order
     return f"{prefix}[{result}]", last_added_order
 
@@ -166,6 +166,11 @@ def generate_replacement_list(text):
     matches = [''.join(match) for match in matches]
     pos = None
     for i in range(len(matches)):
+        if i == 0:
+            # special handling for starting in the middle of an outline
+            print("Interpreting the first match as a roman numeral...")
+            order[0] = roman_to_number(matches[i])
+            print("Interpreted as position:", order[0])
         if i != 0:
             order = next_order(i, order, replacements, matches)
         replacement_value, _ = print_order(order, full_repr=False)
@@ -198,9 +203,9 @@ text = re.sub(rf"\n(?!{roman_numeral_regex}|\n)", "", text)
 while "\n\n" in text:
     text = re.sub(r"\n\n", "\n", text)
 
-print("=====")
+print("Simplified Outline:")
 print(text)
-print("=====", flush=True)
+print()
 
 replacements = generate_replacement_list(text)
 
