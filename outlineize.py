@@ -1,24 +1,37 @@
 import re
+import copy
 
-roman_numeral_regex = r"\w\d?[IVX]*\."
+roman_numeral_regex = r"(\(?(?:\d|(a-z)){1})?(\w?[IVX]*)(\)|\.) "  # Matches: I. A. 1. a. (1) (a) and any variations of those
+base_order = [1, 0, 0, 0, 0, 0]
+
+# Apply these headers (###) to these positions. 0 is the outermost I. II. III. position, and 1 is the A. B. C. position.
+position_to_header_mapping = {
+    0: "###",
+    1: "####"
+}
 
 def change_order(arg, order):
-    # Get the highest non-zero index
+    """
+    Convert from one order to another based on the given argument
+    """
     pos = next((index - 1 for index, val in enumerate(order) if val == 0), len(order) - 1)
     if arg == "continue":
+        # Increase the current position by 1, i.e. going from I. to II., or from A. to B.
         order[pos] += 1
     elif arg == "reset":
-        order = [1, 0, 0, 0, 0]
-    elif arg == "up":
-        if pos <= 3:
-            order[pos + 1] = 1
+        order = copy.deepcopy(base_order)
     elif arg == "down":
+        # Go down one level, i.e. from I. to A. or from A. to 1.
+        order[pos + 1] = 1
+    elif arg == "up":
+        # Go up one level, i.e. from A. to I. or from 1. to A.
         if pos == 0:
-            order[0] = 1
+            order[0] = 1  # Reset the first position to 1
         else:
             order[pos] = 0
             order[pos - 1] += 1
-    elif arg == "down2":
+    elif arg == "up_2":
+        # Go up two levels, i.e. from 1. to I. or from a. to A.
         if pos in [0, 1]:
             order[0] = 1
             order[1] = 0
@@ -26,37 +39,63 @@ def change_order(arg, order):
             order[pos] = 0
             order[pos - 1] = 0
             order[pos - 2] += 1
+    elif arg == "up_3":
+        # Go up three levels, i.e. from a. to I.
+        if pos in [0, 1, 2]:
+            order[0] = 1
+            order[1] = 0
+            order[2] = 0
+        else:
+            order[pos] = 0
+            order[pos - 1] = 0
+            order[pos - 2] = 0
+            order[pos - 3] += 1
     return order
 
 
-def print_order(order):
+def print_order(order, full_repr=True):
+    """
+    Given an order, print what it should look like in the final output
+    :param order: list, something like [1, 2, 1, 0, 0, 0]
+    :param full_repr: bool, whether to include . and (). That is, A. (1) vs. A 1
+    :return:
+    """
     # Get the highest non-zero index
     pos = next((index - 1 for index, val in enumerate(order) if val == 0), len(order) - 1)
-    result = f"{str(order[0])}"
+    result = f"{str(order[0])}"  # immediately add the digit value of the roman to the beginning, since it is guaranteed
+    # to be there
     last_added_order = result
     prefix = ""
-    if pos == 0:
-    	prefix = "### "
-    if pos == 1:
-    	prefix = "#### "
+
+    # special handling for high level positions, become headers
+    if pos in position_to_header_mapping:
+        prefix = position_to_header_mapping[pos]
+
+    wrap_start = ("(" if full_repr else "")
+    wrap_end = (")" if full_repr else "")
+    suffix = ("." if full_repr else "")
+
     if pos > 0:
-        last_added_order = chr(order[1] % 24 + 64) # Uppercase letters
+        last_added_order = chr(order[1] % 24 + 64) + suffix  # Uppercase letters: A. B.
         result += last_added_order
     if pos > 1:
-        last_added_order = str(order[2])
+        last_added_order = str(order[2]) + suffix  # 1. 2.
         result += last_added_order
     if pos > 2:
-        last_added_order = chr(order[3] % 24 + 96)  # Lowercase letters
+        last_added_order = chr(order[3] % 24 + 96) + suffix  # Lowercase letters: a. b.
         result += last_added_order
     if pos > 3:
-        last_added_order = str(order[4])
+        last_added_order = f"{wrap_start}{order[4]}{wrap_end}"  # (1) (2)
+        result += last_added_order
+    if pos > 4:
+        last_added_order = f"{wrap_start}{chr(order[3] % 24 + 96)}{wrap_end}"  # (a) (b)
         result += last_added_order
     return f"{prefix}[{result}]", last_added_order
 
 
 def set_order(arg):
     arg = str(arg)
-    result = [1, 0, 0, 0, 0]
+    result = copy.deepcopy(base_order)
     if arg != "":
         result[0] = int(arg[0])
     if len(arg) > 1:
@@ -77,17 +116,18 @@ def set_order(arg):
 def next_possibility(arg, order):
     new_order = order.copy()
     new_order = change_order(arg, new_order)
-    printed_order, last_added_order = print_order(new_order)
+    printed_order, last_added_order = print_order(new_order, full_repr=True)
     return new_order, last_added_order
 
 
 def next_order(i, order, replacements, matches):
     match = matches[i]
-    previous_previous_item = replacements[i - 2].replace('\n', '').replace('\t', '') if i > 0 else None
-    previous_item = replacements[i - 1].replace('\n', '').replace('\t', '') if i > 1 else None
+    previous_previous_item = replacements[i - 2].replace('\n', '').replace('\t', '') if i > 1 else None
+    previous_item = replacements[i - 1].replace('\n', '').replace('\t', '') if i > 0 else None
     next_match = matches[i + 1] if i < len(matches) - 1 else None
 
-    current_possibilities = [next_possibility(arg, order) for arg in ["up", "continue", "down", "down2"]]
+    # try all the possibilities of going up or down in roman numeral order, and see which one matches the current match
+    current_possibilities = [next_possibility(arg, order) for arg in ["continue", "down", "up", "up_2", "up_3"]]
 
     for i in [0, 1, 2, 3]:
         if current_possibilities[i][1] == match:
@@ -103,6 +143,8 @@ def is_roman(roman):
 
 
 def roman_to_number(roman):
+    # remove any non-roman characters
+    roman = roman.replace(".", "")
     roman_numerals = {'I': 1, 'V': 5, 'X': 10}
     number = 0
     prev_value = 0
@@ -117,14 +159,16 @@ def roman_to_number(roman):
 
 
 def generate_replacement_list(text):
-    order = [1, 0, 0, 0, 0]
+    order = copy.deepcopy(base_order)
     replacements = []
-    matches = re.findall(r"\n(\w\d?[IVX]*)\.", text)
+    matches = re.findall(f"\n{roman_numeral_regex}", text)
+    # combine all the groups in matches
+    matches = [''.join(match) for match in matches]
     pos = None
     for i in range(len(matches)):
         if i != 0:
             order = next_order(i, order, replacements, matches)
-        replacement_value, _ = print_order(order)
+        replacement_value, _ = print_order(order, full_repr=False)
 
         next_pos = next((index - 1 for index, val in enumerate(order) if val == 0), len(order) - 1)
 
@@ -141,7 +185,7 @@ def generate_replacement_list(text):
 
 def replace_expressions(text, replacements):
     for new_value in replacements:
-        text = re.sub(rf"\n{roman_numeral_regex} ", new_value, text, count=1)
+        text = re.sub(f"\n{roman_numeral_regex}", new_value, text, count=1)
     return text
 
 
