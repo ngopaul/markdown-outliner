@@ -211,7 +211,7 @@ def next_order(i, order, replacements, match_objects, text):
         next_item_start_index = len(text)
     current_whole_item = text[match_start:next_item_start_index].replace("\n", "")
     print(f"Found an item that doesn't match the ordering: {current_whole_item}")
-    return get_order_advancement_from_user(order, f"(match to set: {next_match})")
+    return get_order_advancement_from_user(order, f"(what I found: '{next_match}')")
 
 
 def get_order_advancement_from_user(previous_order, more_information=""):
